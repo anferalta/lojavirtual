@@ -1,0 +1,131 @@
+Notas PHP moderno 2025
+Projecto lojavirtual
+
+
+.HTACCESS na raiz da diretorio lojavirtual
+
+RewriteEngine on
+
+RewriteCond %{REQUEST_URI} !^/public/
+
+RewriteRule ^(.*)$ public/$1 [L]
+
+
+Aqui está o ficheiro .HTACCESS com uma explicação detalhada:
+
+---
+
+RewriteEngine on
+RewriteCond %{REQUEST_URI} !^/public/
+RewriteRule ^(.*)$ public/$1 [L]
+
+### Explicação:
+1. **`RewriteEngine on`**  
+   - Ativa o mecanismo de reescrita de URLs do Apache.
+
+2. **`RewriteCond %{REQUEST_URI} !^/public/`**  
+   - **Condição**: Aplica a regra seguinte **apenas se** a URI solicitada **não começar** com `/public/` (o `!` nega a condição).  
+   - Exemplo: Se a URL for `http://site.com/admin`, a condição é atendida (rewrite acontece). Se for `http://site.com/public/admin`, a condição **ignora** a regra.
+
+3. **`RewriteRule ^(.*)$ public/$1 [L]`**  
+   - **Regra**: Redireciona **todas as URLs** (`^(.*)$`) para a pasta `/public/`, mantendo o caminho original (`$1`).  
+   - O flag `[L]` (Last) indica que esta é a última regra a ser executada se for aplicada.
+
+---
+
+### Exemplo Prático:
+- **Requisição:** `http://meusite.com/css/estilo.css`  
+  → **Internamente** vira: `http://meusite.com/public/css/estilo.css`  
+- **Requisição:** `http://meusite.com/public/imagem.jpg`  
+  → **Nada muda** (já está no diretório `/public/`).
+
+---
+
+### Uso Comum:
+- Usado em frameworks PHP (como Laravel) para direcionar tráfego para a pasta `public/` (onde ficam `index.php` e arquivos públicos), protegendo pastas internas (`app/`, `database/`).
+
+---
+
+### Adaptações Úteis:
+1. **Redirecionamento visível (301):**  
+   ```apache
+   RewriteRule ^(.*)$ public/$1 [L,R=301]
+   ```
+   - O navegador mostrará a URL redirecionada.
+
+2. **Excluir outras pastas:**  
+   ```apache
+   RewriteCond %{REQUEST_URI} !^/(public|uploads|assets)/
+   ```
+   - Ignora `/public/`, `/uploads/` e `/assets/`.
+
+---
+________________________________________________________
+
+.HTACCESS na pasta public
+
+RewriteEngine on
+
+RewriteCond %{SCRIPT_FILENAME} !-f
+RewriteCond %{SCRIPT_FILENAME} !-d
+RewriteRule ^(.*)$ index.php [L]
+
+Aqui está a explicação detalhada do seu código `.htaccess` :
+
+---
+
+```apache
+RewriteEngine on
+RewriteCond %{SCRIPT_FILENAME} !-f
+RewriteCond %{SCRIPT_FILENAME} !-d
+RewriteRule ^(.*)$ index.php [L]
+```
+
+### Explicação:
+1. **`RewriteEngine on`**  
+   - Ativa o módulo de reescrita de URLs do Apache.
+
+2. **`RewriteCond %{SCRIPT_FILENAME} !-f`**  
+   - **Condição 1:** Verifica se o arquivo solicitado **não existe** (!-f = "not a file") no servidor.
+
+3. **`RewriteCond %{SCRIPT_FILENAME} !-d`**  
+   - **Condição 2:** Verifica se o diretório solicitado **não existe** (!-d = "not a directory") no servidor.
+
+4. **`RewriteRule ^(.*)$ index.php [L]`**  
+   - **Regra:** Se as duas condições acima forem atendidas (ou seja, a requisição não é para um arquivo ou diretório real), redireciona TODAS as URLs para `index.php`.  
+   - O `[L]` indica que esta é a última regra a ser processada.
+
+---
+
+### Como Funciona na Prática:
+- Se você acessar:  
+  ✅ `http://site.com/rota/inexistente` → Vai para `index.php` (pois não é arquivo nem diretório real)  
+  ✅ `http://site.com/login` → Vai para `index.php`  
+  ❌ `http://site.com/imagem.jpg` → **Mostra a imagem** (se existir no servidor)  
+  ❌ `http://site.com/css/` → **Mostra o diretório** (se existir)
+
+---
+
+### Uso Típico:
+- **Front Controller Pattern**: Muito usado em frameworks PHP (Laravel, Symfony) para rotear todas as requisições através de um único arquivo (`index.php`), que então decide como processar a URL.
+
+- **SPA (Single Page Applications)**: Útil para aplicações JavaScript (React, Vue) onde o servidor só precisa servir `index.html` para todas rotas.
+
+---
+
+### Adaptações Comuns:
+1. **Adicionar parâmetro de rota (para PHP):**
+   ```apache
+   RewriteRule ^(.*)$ index.php?url=$1 [L,QSA]
+   ```
+   - O `QSA` (Query String Append) mantém parâmetros GET existentes.
+
+2. **Ignorar arquivos específicos (ex: `.well-known`):**
+   ```apache
+   RewriteCond %{REQUEST_URI} !^/\.well-known/
+   ```
+
+---
+
+
+
