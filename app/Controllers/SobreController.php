@@ -10,8 +10,13 @@ namespace app\Controllers;
 
 class SobreController
 {
-    public function sobre() : void
+    public function index() : void
     {
-        echo 'Estou na pagina sobre';
+        echo 'Estou na pagina sobre metodo index';
+    }
+    
+     public function sobre() : void
+    {
+        echo 'pagina sobre metodo sobre';
     }
 }
