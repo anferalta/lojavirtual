@@ -2,6 +2,8 @@
 
 namespace app\Controllers;
 
+use app\Core\View;
+
 /**
  * Description of HomeController
  *
@@ -12,6 +14,6 @@ class HomeController
 {
     public function index() :void
     {
-        echo 'Olá Mundo! Estou na INDEX';
+        View::render('site/home', []);
     }
 }

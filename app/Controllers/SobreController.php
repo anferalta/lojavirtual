@@ -2,6 +2,8 @@
 
 namespace app\Controllers;
 
+use app\Core\View;
+
 /**
  * Description of SobreController
  *
@@ -12,11 +14,8 @@ class SobreController
 {
     public function index() : void
     {
-        echo 'Estou na pagina sobre metodo index';
-    }
-    
-     public function sobre() : void
-    {
-        echo 'pagina sobre metodo sobre';
+        View::render('site/sobre', [
+            'title' => 'Página sobre'
+        ]);  
     }
 }

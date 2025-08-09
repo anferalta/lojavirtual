@@ -2,10 +2,6 @@
 
 namespace app\Core;
 
-include '../app/Controllers/sobreController.php';
-include '../app/Controllers/HomeController.php';
-include '../app/Controllers/CategoriaController.php';
-
 /**
  * Description of Route
  *
