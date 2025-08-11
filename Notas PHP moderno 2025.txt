@@ -72,15 +72,6 @@ RewriteRule ^(.*)$ index.php [L]
 
 Aqui está a explicação detalhada do seu código `.htaccess` :
 
----
-
-```apache
-RewriteEngine on
-RewriteCond %{SCRIPT_FILENAME} !-f
-RewriteCond %{SCRIPT_FILENAME} !-d
-RewriteRule ^(.*)$ index.php [L]
-```
-
 ### Explicação:
 1. **`RewriteEngine on`**  
    - Ativa o módulo de reescrita de URLs do Apache.
@@ -125,8 +116,216 @@ RewriteRule ^(.*)$ index.php [L]
    RewriteCond %{REQUEST_URI} !^/\.well-known/
    ```
 
----
+--------------------------------------------------------------------------------------------------------------------
+lojavirtual\.env
 
+.env
+
+DB_HOST=localhost
+DB_NAME=lojavirtual
+DB_USER=root
+DB_PASS=
+
+Versão Melhorada
+env
+# Configurações de Banco de Dados (MySQL/MariaDB)
+DB_CONNECTION=mysql
+DB_HOST=127.0.0.1  # Mais confiável que 'localhost' em alguns sistemas
+DB_PORT=3306       # Porta explícita
+DB_DATABASE=lojavirtual
+DB_USERNAME=app_user  # Usuário dedicado (não root)
+DB_PASSWORD=SenhaF0rt3!2024  # Senha complexa
+DB_CHARSET=utf8mb4    # Suporte a emojis e caracteres especiais
+DB_COLLATION=utf8mb4_unicode_ci
+DB_SSL=false          # Habilitar em produção
+Melhores Práticas Recomendadas
+Crie um usuário dedicado com permissões mínimas necessárias:
+
+sql
+CREATE USER 'app_user'@'localhost' IDENTIFIED BY 'SenhaF0rt3!2024';
+GRANT SELECT, INSERT, UPDATE, DELETE ON lojavirtual.* TO 'app_user'@'localhost';
+FLUSH PRIVILEGES;
+Armazene o arquivo .env fora do diretório público:
+
+text
+/projeto/
+├── .env          # Arquivo de configuração
+├── public/       # Diretório acessível na web
+└── app/
+Adicione ao .gitignore:
+
+text
+# .gitignore
+.env
+Exemplo de conexão PDO segura:
+
+php
+try {
+    $pdo = new PDO(
+        "mysql:host={$_ENV['DB_HOST']};dbname={$_ENV['DB_DATABASE']};charset={$_ENV['DB_CHARSET']}",
+        $_ENV['DB_USERNAME'],
+        $_ENV['DB_PASSWORD'],
+        [
+            PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+            PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC
+        ]
+    );
+} catch (PDOException $e) {
+    die("Erro de conexão: " . $e->getMessage());
+}
+Para Ambientes de Produção
+Use variáveis de ambiente reais no servidor (não apenas arquivo .env)
+
+Configure backups automáticos do banco de dados
+
+Considere um connection pool para melhor performance
+
+_____________________________________________________________________________________________________________________
+
+lojavirtual\composer.json
+
+{
+    "autoload": {
+        "psr-4": {"app\\": "app/"}
+    }
+}
+
+Melhorias para o arquivo composer.json
+O trecho mostrado configura o autoload PSR-4 para sua aplicação PHP. Vamos sugerir melhorias:
+
+Configuração Atual
+json
+{
+    "autoload": {
+        "psr-4": {"app\\": "app/"}
+    }
+}
+Funcionalidade Básica
+Mapeia o namespace app\ para o diretório app/
+
+Compatível com PSR-4 (PHP Standards Recommendation 4)
+
+Permite carregamento automático de classes
+
+Melhorias Recomendadas
+1. Adicionar configurações essenciais
+json
+{
+    "name": "seu-projeto/nome-do-projeto",
+    "description": "Descrição do projeto",
+    "type": "project",
+    "require": {
+        "php": "^8.1"
+    },
+    "autoload": {
+        "psr-4": {
+            "app\\": "app/",
+            "App\\": "src/"  // Padrão mais comum para código principal
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "tests\\": "tests/"
+        }
+    }
+}
+2. Otimizações importantes
+Namespace mais profissional:
+
+Considere usar App\ (maiúsculo) em vez de app\ (mais comum em projetos modernos)
+
+Estrutura de diretórios:
+
+json
+"psr-4": {
+    "App\\": "src/",
+    "App\\Core\\": "app/Core/",
+    "App\\Controllers\\": "app/Controllers/"
+}
+Autoload para desenvolvimento:
+
+json
+"autoload-dev": {
+    "psr-4": {
+        "Tests\\": "tests/"
+    }
+}
+3. Exemplo Completo Aprimorado
+json
+{
+    "name": "vendor/loja-virtual",
+    "description": "Sistema de Loja Virtual",
+    "type": "project",
+    "license": "proprietary",
+    "require": {
+        "php": "^8.2",
+        "ext-pdo": "*"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^10.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "App\\": "src/",
+            "App\\Core\\": "app/Core/",
+            "App\\Controllers\\": "app/Controllers/",
+            "App\\Models\\": "app/Models/"
+        },
+        "files": [
+            "app/helpers.php"
+        ]
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Tests\\": "tests/"
+        }
+    },
+    "scripts": {
+        "post-autoload-dump": [
+            "php artisan cache:clear"
+        ]
+    },
+    "config": {
+        "sort-packages": true,
+        "platform-check": false
+    }
+}
+Como Implementar
+Após modificar o composer.json, execute:
+
+bash
+composer dump-autoload
+Para desenvolvimento, instale as dependências:
+
+bash
+composer install
+Para produção:
+
+bash
+composer install --no-dev
+Boas Práticas Adicionais
+Namespaces Hierárquicos:
+
+json
+"App\\": "src/",
+"App\\Core\\": "app/Core/",
+"App\\Controllers\\": "app/Controllers/"
+Carregar arquivos auxiliares:
+
+json
+"files": [
+    "app/helpers.php"
+]
+Scripts úteis:
+
+json
+"scripts": {
+    "post-update-cmd": [
+        "@php artisan optimize"
+    ]
+}
+
+_________________________________________________________________________________________________________________________
 
 # ANÁLISE E MELHORIAS PARA A CLASSE `ROUTE`
 
@@ -328,8 +527,428 @@ NOTA EXPLICATIVA
 
   
 ___________________________________________________________________________________
+Core/View.php (gerada pela IA, funcionando)
+
+
+<?php
+
+namespace app\Core;
+
+class View
+{
+    private const VIEWS_PATH = __DIR__ . '/../Views/';
+    private const LAYOUTS_PATH = __DIR__ . '/../Views/layouts/';
+
+    public static function render(string $view, array $data = [], ?string $layout = 'base'): void
+    {
+        try {
+            // Processa a view
+            $viewContent = self::renderView($view, $data);
+            
+            // Processa o layout (se existir)
+            if ($layout !== null) {
+                $viewContent = self::renderLayout($layout, $viewContent);
+            }
+            
+            echo $viewContent;
+            
+        } catch (\RuntimeException $e) {
+            http_response_code(500);
+            echo "Erro ao renderizar view: " . $e->getMessage();
+        }
+    }
+
+    private static function renderView(string $view, array $data): string
+    {
+        $viewPath = self::VIEWS_PATH . self::sanitizePath($view) . '.php';
+        
+        if (!file_exists($viewPath)) {
+            throw new \RuntimeException("View não encontrada: {$view}");
+        }
+        
+        extract($data, EXTR_SKIP);
+        ob_start();
+        include $viewPath;
+        return ob_get_clean();
+    }
+
+    private static function renderLayout(string $layout, string $content): string
+    {
+        $layoutPath = self::LAYOUTS_PATH . self::sanitizePath($layout) . '.php';
+        
+        if (!file_exists($layoutPath)) {
+            return $content; // Retorna sem layout se não existir
+        }
+        
+        ob_start();
+        include $layoutPath;
+        $layoutContent = ob_get_clean();
+        
+        return str_replace('@content', $content, $layoutContent);
+    }
+
+    private static function sanitizePath(string $path): string
+    {
+        return ltrim(str_replace(['..', '/'], ['', DIRECTORY_SEPARATOR], $path), DIRECTORY_SEPARATOR);
+    }
+}
+
+----------------------------------------------------------------------------------------------------------
+
+Controllers
+
+Controllers\CategoriaController.php
+
+<?php
+
+
+namespace app\Controllers;
+
+/**
+ * Description of CategoriaController
+ *
+ * @author Administrador
+ */
+class CategoriaController
+{
+    private function index(): void
+    {
+        echo 'categoria';
+    }
+}
+_________________________________________________________________________________________________________________
+
+Controllers\HomeController.php
+
+<?php
+
+namespace app\Controllers;
+
+use app\Core\View;
+
+/**
+ * Description of HomeController
+ *
+ * @author Administrador
+ */
+
+class HomeController 
+{
+    public function index() :void
+    {
+        View::render('site/home', [
+            'title' => 'Página Index'
+        ]);
+    }
+}
+___________________________________________________________________________________________________________________
+
+Controllers\SobreController.php
+
+<?php
+
+namespace app\Controllers;
+
+use app\Core\View;
+
+/**
+ * Description of SobreController
+ *
+ * @author Administrador
+ */
+
+class SobreController
+{
+    public function index() : void
+    {
+        View::render('site/sobre', [
+            'title' => 'Página sobre'
+        ]);  
+    }
+}
+____________________________________________________________________________________________________________________
+
+Core
+
+Core\Database.php
+
+<?php
+
+namespace app\Core;
+
+use PDO;
+use PDOException;
+
+/**
+ * Description of Database
+ *
+ * @author Administrador
+ */
+class Database
+{
+    private static ?PDO $conexao = null;
+    
+    private function __clone(): void
+    {
+        
+    }
+    
+    public static function getConexao(): PDO
+    {
+        if(self::$conexao === null){
+            try {
+               $host = getenv('DB_HOST');
+               $banco = getenv('DB_NAME');
+               $usuario = getenv('DB_USER');
+               $senha = getenv('DB_PASS');
+               $charset = 'utf8mb4';
+               
+               $dsn = "mysql:host=$host;dbname=$banco;charset=$charset";
+               
+               $options = [
+               PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION, PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_OBJ,
+                   
+               ];
+               
+               self::$conexao = new PDO($dsn, $usuario, $senha, $options);
+               echo 'conexao realizada com sucesso';
+                
+            } catch (PDOException $ex) {
+                throw new PDOException("Erro ao realizar a conexão com o banco de dados ".$sex);
+            }
+        }
+        return self::$conexao;   
+    }
+}
+_____________________________________________________________________________________________________________________
+
+Core\Env.php
+
+<?php
 
 
 
+namespace app\Core;
+
+/**
+ * Description of Env
+ *
+ * @author Administrador
+ */
+class Env
+{
+    public static function load(string $arquivo = '../.env'): void
+    {
+        if(file_exists($arquivo)){
+            
+            $env = parse_ini_file($arquivo);
+            
+            foreach ($env as $chave => $valor) {
+                
+                putenv("$chave=$valor");
+                
+                $_ENV[$chave] = $valor;
+            }
+            
+        } else {
+            throw new \RuntimeException("Arquivo .env não enccontrado em ".$arquivo);
+        }
+    }
+}
+______________________________________________________________________________________________________________________
+
+Core\Route.php
+
+<?php
+
+namespace app\Core;
+
+/**
+ * Description of Route
+ *
+ * @author Administrador
+ */
+
+class Route
+{
+    private array $url = [];
+    private string $nomeControlador = 'HomeController';
+    private object $controlador;
+    private string $namespace = 'app\\Controllers\\';
+    private string $metodo = 'index';
+    private array $parametros = [];
+
+    public function __construct()
+    {
+        $this->processarUrl();
+        $this->inicializarControlador();
+        $this->executarMetodo();
+    }
+    
+    private function  processarUrl(): void
+    {
+        $url = filter_input(INPUT_SERVER, 'REQUEST_URI', FILTER_SANITIZE_URL);
+        $url = urldecode($url);
+        $url = trim(rtrim($url, '/'));
+        $url = str_ireplace(' ', '', $url);
+        $url = explode('/', $url);
+        $this->url = array_slice($url, 2);
+    }
+    
+    private function inicializarControlador(): void
+    {
+        if(!empty($this->url[0])){
+            $controlador = ucwords($this->url[0]). 'Controller';
+            $controladorCompleto = $this->namespace.$controlador;
+        
+        if ($this->controladorExiste($controladorCompleto)){
+            $this->nomeControlador = $controlador;  
+            $this->url = array_values(array_slice($this->url, 1));
+        } else {
+            $this->paginaNaoEncontrada("O controlador '{$controlador}' não foi encontrado!");
+            }
+        } 
+        
+        $reflection = new \ReflectionClass($this->namespace.$this->nomeControlador);
+        $this->controlador = $reflection->newInstance();
+    }
+    
+    private function executarMetodo(): void
+    {
+        if(!empty($this->url[0]) && method_exists($this->controlador, $this->url[0])){
+            $this->metodo = $this->url[0];
+            $this->url = array_values(array_slice($this->url, 1));
+        }
+        
+        $this->parametros = $this->url;
+        
+        $reflection = new \ReflectionMethod($this->controlador, $this->metodo);
+        echo $reflection->invokeArgs($this->controlador, $this->parametros);
+    }
 
 
+    private function controladorExiste(string $controladorCompleto): bool
+    {
+        return class_exists($controladorCompleto);
+    }
+    
+    private function paginaNaoEncontrada(string $mensagem = 'Página não encontrada'): void
+    {
+    http_response_code(404);
+    echo $mensagem;
+    exit();
+    }
+}
+_______________________________________________________________________________________________________________________
+
+Core\View.php
+
+<?php
+
+namespace app\Core;
+
+/**
+ * Description of View
+ *
+ * @author Administrador
+ */
+class View
+{
+    public static function render(string $view, array $dados = []): void
+    {
+        extract($dados);
+        
+        ob_start();
+        
+        $arquivo = '../app/Views/'.$view.'.php';
+        if (file_exists($arquivo)){
+            require_once $arquivo;
+        } else {
+            die("A view {$view} não foi encontrada!");
+        }
+        
+        $conteudo = ob_get_clean();
+        
+        $base = strtok($view, '/');
+        $arquivoBase = '../app/Views/'.$base.'/base.php';
+        
+        if (file_exists($arquivoBase)){
+            require_once $arquivoBase;
+        } else {
+            die("O layot base não foi encontrado!");
+        }
+    }
+}
+________________________________________________________________________________________________________________________
+    
+Public
+
+public\.htaccess`
+
+
+RewriteEngine on
+
+RewriteCond %{SCRIPT_FILENAME} !-f
+RewriteCond %{SCRIPT_FILENAME} !-d
+RewriteRule ^(.*)$ index.php [L]
+_________________________________________________________________________________________________________________________
+
+public\index.php
+
+<?php
+require __DIR__ . '../../vendor/autoload.php';
+include '../app/Core/Route.php';
+
+use app\Core\Env;
+$env = Env::load();
+
+//use app\Core\Route;
+
+//$route = new Route();
+
+use app\Core\Database;
+
+$conn = Database::getConexao();
+______________________________________________________________________________________________________________________
+
+Views
+Views/site
+
+site\base.php
+
+<html>
+    <head>
+        <title><?= $title ?? ''; ?></title>
+        <link rel="stylesheet" href="public/assets/css/site.css"/>
+        <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    </head>
+    <body>
+        <?php include 'topo.php'; ?>
+        
+        <?= $conteudo ?? ''; ?>
+        
+        <?php include 'rodape.php'; ?>
+        
+        <script src="public/assets/js/site.js"></script>
+    </body>
+</html>
+_______________________________________________________________________________________________________________
+
+site\home.php
+
+
+___________________________________________________________________________________________________________________
+
+site\rodape.php
+
+
+____________________________________________________________________________________________________________________
+
+site\topo.php
+
+_____________________________________________________________________________________________________________________
+
+site\sobre.php
+
+
+____________________________________________________________________________________________________________________
