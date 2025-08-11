@@ -14,6 +14,8 @@ class HomeController
 {
     public function index() :void
     {
-        View::render('site/home', []);
+        View::render('site/home', [
+            'title' => 'Página Index'
+        ]);
     }
 }

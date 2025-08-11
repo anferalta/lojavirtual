@@ -15,7 +15,7 @@ class View
         
         ob_start();
         
-        $arquivo = '../app/Views'.$view.'.php';
+        $arquivo = '../app/Views/'.$view.'.php';
         if (file_exists($arquivo)){
             require_once $arquivo;
         } else {
@@ -25,7 +25,7 @@ class View
         $conteudo = ob_get_clean();
         
         $base = strtok($view, '/');
-        $arquivoBase = '../app/Views'.$base.'/base.php';
+        $arquivoBase = '../app/Views/'.$base.'/base.php';
         
         if (file_exists($arquivoBase)){
             require_once $arquivoBase;
