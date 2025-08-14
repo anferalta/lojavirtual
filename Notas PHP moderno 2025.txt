@@ -1,8 +1,12 @@
 NOTAS PHP MODERNO 2025
+
 PROJECTO LOJAVIRTUAL
 
+lojavirtual = NOME DA PASTA DO PROJECTO.
 
-.HTACCESS na raiz da diretorio lojavirtual
+FICHEIROS QUE DEVEM SER INSTALADOS NA RAIZ DA PASTA DO PROJECTO.
+ 
+.HTACCESS 
 
 RewriteEngine on
 
@@ -61,63 +65,6 @@ RewriteRule ^(.*)$ public/$1 [L]
 
 ---
 ________________________________________________________
-
-.HTACCESS na pasta public
-
-RewriteEngine on
-
-RewriteCond %{SCRIPT_FILENAME} !-f
-RewriteCond %{SCRIPT_FILENAME} !-d
-RewriteRule ^(.*)$ index.php [L]
-
-Aqui está a explicação detalhada do seu código `.htaccess` :
-
-### Explicação:
-1. **`RewriteEngine on`**  
-   - Ativa o módulo de reescrita de URLs do Apache.
-
-2. **`RewriteCond %{SCRIPT_FILENAME} !-f`**  
-   - **Condição 1:** Verifica se o arquivo solicitado **não existe** (!-f = "not a file") no servidor.
-
-3. **`RewriteCond %{SCRIPT_FILENAME} !-d`**  
-   - **Condição 2:** Verifica se o diretório solicitado **não existe** (!-d = "not a directory") no servidor.
-
-4. **`RewriteRule ^(.*)$ index.php [L]`**  
-   - **Regra:** Se as duas condições acima forem atendidas (ou seja, a requisição não é para um arquivo ou diretório real), redireciona TODAS as URLs para `index.php`.  
-   - O `[L]` indica que esta é a última regra a ser processada.
-
----
-
-### Como Funciona na Prática:
-- Se você acessar:  
-  ✅ `http://site.com/rota/inexistente` → Vai para `index.php` (pois não é arquivo nem diretório real)  
-  ✅ `http://site.com/login` → Vai para `index.php`  
-  ❌ `http://site.com/imagem.jpg` → **Mostra a imagem** (se existir no servidor)  
-  ❌ `http://site.com/css/` → **Mostra o diretório** (se existir)
-
----
-
-### Uso Típico:
-- **Front Controller Pattern**: Muito usado em frameworks PHP (Laravel, Symfony) para rotear todas as requisições através de um único arquivo (`index.php`), que então decide como processar a URL.
-
-- **SPA (Single Page Applications)**: Útil para aplicações JavaScript (React, Vue) onde o servidor só precisa servir `index.html` para todas rotas.
-
----
-
-### Adaptações Comuns:
-1. **Adicionar parâmetro de rota (para PHP):**
-   ```apache
-   RewriteRule ^(.*)$ index.php?url=$1 [L,QSA]
-   ```
-   - O `QSA` (Query String Append) mantém parâmetros GET existentes.
-
-2. **Ignorar arquivos específicos (ex: `.well-known`):**
-   ```apache
-   RewriteCond %{REQUEST_URI} !^/\.well-known/
-   ```
-
---------------------------------------------------------------------------------------------------------------------
-lojavirtual\.env
 
 .env
 
@@ -182,7 +129,7 @@ Considere um connection pool para melhor performance
 
 _____________________________________________________________________________________________________________________
 
-lojavirtual\composer.json
+composer.json
 
 {
     "autoload": {
@@ -324,42 +271,287 @@ json
         "@php artisan optimize"
     ]
 }
+___________________________________________________________________________________________________________________
 
-_________________________________________________________________________________________________________________________
+DIRECTORIOS DO PROJECTO lojavirtual.
 
-# ANÁLISE E MELHORIAS PARA A CLASSE `ROUTE`
+app
 
-ANALISE A CLASSE `ROUTE` E MELHORIAS:
+app\Controllers
+app\Controllers\CategoriaController.php
 
-## Classe Atual
+<?php
 
-```php
+namespace app\Controllers;
+
+/**
+ * Description of CategoriaController
+ *
+ * @author Administrador
+ */
+class CategoriaController
+{
+    private function index(): void
+    {
+        echo 'categoria';
+    }
+}
+
+app\Controllers\HomeController.php
+
+<?php
+
+namespace app\Controllers;
+
+use app\Core\View;
+
+/**
+ * Description of HomeController
+ *
+ * @author Administrador
+ */
+
+class HomeController 
+{
+    public function index():void
+    {
+        $categorias = Categorias::buscar();
+        $produtos = Produtos::buscar();
+                        
+       View::render('site/home', [
+           'title' => 'Página Index',
+           'produtos' => $produtos,
+           'categorias' => $categorias
+        ]);
+    }
+}
+
+app\Controllers\SobreController.php
+
+<?php
+
+namespace app\Controllers;
+
+use app\Core\View;
+
+/**
+ * Description of SobreController
+ *
+ * @author Administrador
+ */
+
+class SobreController
+{
+    public function index() : void
+    {
+        View::render('site/sobre', [
+            'title' => 'Página sobre'
+        ]);  
+    }
+}
+___________________________________________________________________________________________________________________
+
+Core
+
+app\Core
+
+app\Core\database.php
+
 <?php
 
 namespace app\Core;
 
+use PDO;
+use PDOException;
+
+/**
+ * Description of Database
+ *
+ * @author Administrador
+ */
+class Database
+{
+    private static ?PDO $conexao = null;
+    
+    private function __clone(): void
+    {
+        
+    }
+    
+    public static function getConexao(): PDO
+    {
+        if(self::$conexao === null){
+            try {
+               $host = getenv('DB_HOST');
+               $banco = getenv('DB_NAME');
+               $usuario = getenv('DB_USER');
+               $senha = getenv('DB_PASS');
+               $charset = 'utf8mb4';
+               
+               $dsn = "mysql:host=$host;dbname=$banco;charset=$charset";
+               
+               $options = [
+               PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION, PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_OBJ,
+                   
+               ];
+               
+               self::$conexao = new PDO($dsn, $usuario, $senha, $options);
+               echo 'conexao realizada com sucesso';
+                
+            } catch (PDOException $ex) {
+                throw new PDOException("Erro ao realizar a conexão com o banco de dados ".$sex);
+            }
+        }
+        return self::$conexao;   
+    }
+}
+
+app\Core\Env.php
+
+<?php
+
+namespace app\Core;
+
+/**
+ * Description of Env
+ *
+ * @author Administrador
+ */
+class Env
+{
+    public static function load(string $arquivo = '../.env'): void
+    {
+        if(file_exists($arquivo)){
+            
+            $env = parse_ini_file($arquivo);
+            
+            foreach ($env as $chave => $valor) {
+                
+                putenv("$chave=$valor");
+                
+                $_ENV[$chave] = $valor;
+            }
+            
+        } else {
+            throw new \RuntimeException("Arquivo .env não enccontrado em ".$arquivo);
+        }
+    }
+}
+
+app\Core\Model
+
+<?php
+
+namespace app\Core;
+use app\Core\Model;
+
+/**
+ * Description of Model
+ *
+ * @author Administrador
+ */
+abstract class Model
+{
+    protected static string $tabela;
+    
+    public static function buscar(): ?array
+    {
+        try {
+            $conn = Database::getConexao();
+            $query = "SELECT * FROM ".static::$tabela;
+            $stmt = $conn->prepare($query);
+            $stmt->execute();
+        
+        return $stmt->fetchAll() ?: null;
+            
+        } catch (\PDOException $ex) {
+            throw new \PDOException("Erro ao buscar os dados".$ex);
+        }
+    }
+}
+
+app\Core\Route.php
+
+<?php
+
+namespace app\Core;
+
+/**
+ * Description of Route
+ *
+ * @author Administrador
+ */
+
 class Route
 {
     private array $url = [];
+    private string $nomeControlador = 'HomeController';
+    private object $controlador;
+    private string $namespace = 'app\\Controllers\\';
+    private string $metodo = 'index';
+    private array $parametros = [];
 
     public function __construct()
     {
         $this->processarUrl();
+        $this->inicializarControlador();
+        $this->executarMetodo();
     }
     
-    public function processarUrl(): void
+    private function  processarUrl(): void
     {
-        echo $url = filter_input(INPUT_SERVER, 'REQUEST_URI', FILTER_SANITIZE_URL);
+        $url = filter_input(INPUT_SERVER, 'REQUEST_URI', FILTER_SANITIZE_URL);
         $url = urldecode($url);
         $url = trim(rtrim($url, '/'));
         $url = str_ireplace(' ', '', $url);
         $url = explode('/', $url);
-        $this->url = array_slice($url, 1);
-        
-        var_dump($url);
+        $this->url = array_slice($url, 2);
     }
+    
+    private function inicializarControlador(): void
+    {
+        if(!empty($this->url[0])){
+            $controlador = ucwords($this->url[0]). 'Controller';
+            $controladorCompleto = $this->namespace.$controlador;
+        
+        if ($this->controladorExiste($controladorCompleto)){
+            $this->nomeControlador = $controlador;  
+            $this->url = array_values(array_slice($this->url, 1));
+        } else {
+            $this->paginaNaoEncontrada("O controlador '{$controlador}' não foi encontrado!");
+            }
+        } 
+        
+        $reflection = new \ReflectionClass($this->namespace.$this->nomeControlador);
+        $this->controlador = $reflection->newInstance();
+    }
+    
+    private function executarMetodo(): void
+    {
+        if(!empty($this->url[0]) && method_exists($this->controlador, $this->url[0])){
+            $this->metodo = $this->url[0];
+            $this->url = array_values(array_slice($this->url, 1));
+        }
+        
+        $this->parametros = $this->url;
+        
+        $reflection = new \ReflectionMethod($this->controlador, $this->metodo);
+        echo $reflection->invokeArgs($this->controlador, $this->parametros);
+    }
+
+
+    private function controladorExiste(string $controladorCompleto): bool
+    {
+        return class_exists($controladorCompleto);
+    }
+    
+    private function paginaNaoEncontrada(string $mensagem = 'Página não encontrada'): void
+    {
+    http_response_code(404);
+    echo $mensagem;
+    exit();
+      }
 }
-```
 
 ## MELHORIAS SUGERIDAS
 
@@ -525,323 +717,10 @@ NOTA EXPLICATIVA
 2. **Para parâmetros de query string**:  
    Use adicionalmente `FILTER_SANITIZE_STRING` ou `FILTER_SANITIZE_SPECIAL_CHARS`.
 
-  
-___________________________________________________________________________________
-Core/View.php (gerada pela IA, funcionando)
-
-
-<?php
-
-namespace app\Core;
-
-class View
-{
-    private const VIEWS_PATH = __DIR__ . '/../Views/';
-    private const LAYOUTS_PATH = __DIR__ . '/../Views/layouts/';
-
-    public static function render(string $view, array $data = [], ?string $layout = 'base'): void
-    {
-        try {
-            // Processa a view
-            $viewContent = self::renderView($view, $data);
-            
-            // Processa o layout (se existir)
-            if ($layout !== null) {
-                $viewContent = self::renderLayout($layout, $viewContent);
-            }
-            
-            echo $viewContent;
-            
-        } catch (\RuntimeException $e) {
-            http_response_code(500);
-            echo "Erro ao renderizar view: " . $e->getMessage();
-        }
-    }
-
-    private static function renderView(string $view, array $data): string
-    {
-        $viewPath = self::VIEWS_PATH . self::sanitizePath($view) . '.php';
-        
-        if (!file_exists($viewPath)) {
-            throw new \RuntimeException("View não encontrada: {$view}");
-        }
-        
-        extract($data, EXTR_SKIP);
-        ob_start();
-        include $viewPath;
-        return ob_get_clean();
-    }
-
-    private static function renderLayout(string $layout, string $content): string
-    {
-        $layoutPath = self::LAYOUTS_PATH . self::sanitizePath($layout) . '.php';
-        
-        if (!file_exists($layoutPath)) {
-            return $content; // Retorna sem layout se não existir
-        }
-        
-        ob_start();
-        include $layoutPath;
-        $layoutContent = ob_get_clean();
-        
-        return str_replace('@content', $content, $layoutContent);
-    }
-
-    private static function sanitizePath(string $path): string
-    {
-        return ltrim(str_replace(['..', '/'], ['', DIRECTORY_SEPARATOR], $path), DIRECTORY_SEPARATOR);
-    }
-}
-
-----------------------------------------------------------------------------------------------------------
-
-Controllers
-
-Controllers\CategoriaController.php
-
-<?php
-
-
-namespace app\Controllers;
-
-/**
- * Description of CategoriaController
- *
- * @author Administrador
- */
-class CategoriaController
-{
-    private function index(): void
-    {
-        echo 'categoria';
-    }
-}
-_________________________________________________________________________________________________________________
-
-Controllers\HomeController.php
-
-<?php
-
-namespace app\Controllers;
-
-use app\Core\View;
-
-/**
- * Description of HomeController
- *
- * @author Administrador
- */
-
-class HomeController 
-{
-    public function index() :void
-    {
-        View::render('site/home', [
-            'title' => 'Página Index'
-        ]);
-    }
-}
-___________________________________________________________________________________________________________________
-
-Controllers\SobreController.php
-
-<?php
-
-namespace app\Controllers;
-
-use app\Core\View;
-
-/**
- * Description of SobreController
- *
- * @author Administrador
- */
-
-class SobreController
-{
-    public function index() : void
-    {
-        View::render('site/sobre', [
-            'title' => 'Página sobre'
-        ]);  
-    }
-}
-____________________________________________________________________________________________________________________
-
-Core
-
-Core\Database.php
-
-<?php
-
-namespace app\Core;
-
-use PDO;
-use PDOException;
-
-/**
- * Description of Database
- *
- * @author Administrador
- */
-class Database
-{
-    private static ?PDO $conexao = null;
-    
-    private function __clone(): void
-    {
-        
-    }
-    
-    public static function getConexao(): PDO
-    {
-        if(self::$conexao === null){
-            try {
-               $host = getenv('DB_HOST');
-               $banco = getenv('DB_NAME');
-               $usuario = getenv('DB_USER');
-               $senha = getenv('DB_PASS');
-               $charset = 'utf8mb4';
-               
-               $dsn = "mysql:host=$host;dbname=$banco;charset=$charset";
-               
-               $options = [
-               PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION, PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_OBJ,
-                   
-               ];
-               
-               self::$conexao = new PDO($dsn, $usuario, $senha, $options);
-               echo 'conexao realizada com sucesso';
-                
-            } catch (PDOException $ex) {
-                throw new PDOException("Erro ao realizar a conexão com o banco de dados ".$sex);
-            }
-        }
-        return self::$conexao;   
-    }
-}
-_____________________________________________________________________________________________________________________
-
-Core\Env.php
-
-<?php
 
 
 
-namespace app\Core;
-
-/**
- * Description of Env
- *
- * @author Administrador
- */
-class Env
-{
-    public static function load(string $arquivo = '../.env'): void
-    {
-        if(file_exists($arquivo)){
-            
-            $env = parse_ini_file($arquivo);
-            
-            foreach ($env as $chave => $valor) {
-                
-                putenv("$chave=$valor");
-                
-                $_ENV[$chave] = $valor;
-            }
-            
-        } else {
-            throw new \RuntimeException("Arquivo .env não enccontrado em ".$arquivo);
-        }
-    }
-}
-______________________________________________________________________________________________________________________
-
-Core\Route.php
-
-<?php
-
-namespace app\Core;
-
-/**
- * Description of Route
- *
- * @author Administrador
- */
-
-class Route
-{
-    private array $url = [];
-    private string $nomeControlador = 'HomeController';
-    private object $controlador;
-    private string $namespace = 'app\\Controllers\\';
-    private string $metodo = 'index';
-    private array $parametros = [];
-
-    public function __construct()
-    {
-        $this->processarUrl();
-        $this->inicializarControlador();
-        $this->executarMetodo();
-    }
-    
-    private function  processarUrl(): void
-    {
-        $url = filter_input(INPUT_SERVER, 'REQUEST_URI', FILTER_SANITIZE_URL);
-        $url = urldecode($url);
-        $url = trim(rtrim($url, '/'));
-        $url = str_ireplace(' ', '', $url);
-        $url = explode('/', $url);
-        $this->url = array_slice($url, 2);
-    }
-    
-    private function inicializarControlador(): void
-    {
-        if(!empty($this->url[0])){
-            $controlador = ucwords($this->url[0]). 'Controller';
-            $controladorCompleto = $this->namespace.$controlador;
-        
-        if ($this->controladorExiste($controladorCompleto)){
-            $this->nomeControlador = $controlador;  
-            $this->url = array_values(array_slice($this->url, 1));
-        } else {
-            $this->paginaNaoEncontrada("O controlador '{$controlador}' não foi encontrado!");
-            }
-        } 
-        
-        $reflection = new \ReflectionClass($this->namespace.$this->nomeControlador);
-        $this->controlador = $reflection->newInstance();
-    }
-    
-    private function executarMetodo(): void
-    {
-        if(!empty($this->url[0]) && method_exists($this->controlador, $this->url[0])){
-            $this->metodo = $this->url[0];
-            $this->url = array_values(array_slice($this->url, 1));
-        }
-        
-        $this->parametros = $this->url;
-        
-        $reflection = new \ReflectionMethod($this->controlador, $this->metodo);
-        echo $reflection->invokeArgs($this->controlador, $this->parametros);
-    }
-
-
-    private function controladorExiste(string $controladorCompleto): bool
-    {
-        return class_exists($controladorCompleto);
-    }
-    
-    private function paginaNaoEncontrada(string $mensagem = 'Página não encontrada'): void
-    {
-    http_response_code(404);
-    echo $mensagem;
-    exit();
-    }
-}
-_______________________________________________________________________________________________________________________
-
-Core\View.php
+app\Core\View.php
 
 <?php
 
@@ -879,42 +758,58 @@ class View
         }
     }
 }
-________________________________________________________________________________________________________________________
-    
-Public
+____________________________________________________________________________________________________________________
 
-public\.htaccess`
+Model
 
+app\Model
 
-RewriteEngine on
-
-RewriteCond %{SCRIPT_FILENAME} !-f
-RewriteCond %{SCRIPT_FILENAME} !-d
-RewriteRule ^(.*)$ index.php [L]
-_________________________________________________________________________________________________________________________
-
-public\index.php
+app\Model\CategoriaModel.php
 
 <?php
-require __DIR__ . '../../vendor/autoload.php';
-include '../app/Core/Route.php';
 
-use app\Core\Env;
-$env = Env::load();
+namespace app\Model;
 
-//use app\Core\Route;
+use app\Core\Model;
 
-//$route = new Route();
 
-use app\Core\Database;
+/**
+ * Description of ProdutoModel
+ *
+ * @author Administrador
+ */
+class CategoriaModel extends Model
+{
+    protected static string $tabela = 'categoria';
+}
 
-$conn = Database::getConexao();
-______________________________________________________________________________________________________________________
+app\Model
+
+app\Model\ProdutoModel.php
+
+<?php
+
+namespace app\Model;
+
+use app\Core\Model;
+
+/**
+ * Description of ProdutoModel
+ *
+ * @author Administrador
+ */
+class ProdutoModel extends Model
+{
+    protected static string $tabela = 'produto';
+}
 
 Views
-Views/site
 
-site\base.php
+app\Views
+
+app\Views\site
+
+app\Views\site\base.php
 
 <html>
     <head>
@@ -932,23 +827,140 @@ site\base.php
         <script src="public/assets/js/site.js"></script>
     </body>
 </html>
-_______________________________________________________________________________________________________________
 
-site\home.php
+app\Views\site\home.php
 
+ESTA É APENAS A PARTE PHP, SEM HTML.
+<th scope="col" class="px-6 py-3">
+                    Produto
+                    
+                    <?php if (!empty($produtos)): ?>
+                            <?php foreach ($produtos as $produto): ?>
+                    
+                            <p><?= htmlspecialchars($produto->nome, ENT_QUOTES, 'UTF-8') ?></p>
+                                      
+                            <p><?= number_format($produto->preco, 2, ',', '.') ?></p>
+  
+                    <?php endforeach ?>
+                            
+                    <?php else: ?>
+                            <p>Nenhum produto para ser exibido</p>
+                    <?php endif ?>        
+                </th>
+                <th scope="col" class="px-6 py-3">
+                    Categoria
+                    <?php if (!empty($categorias)): ?>
+                            <?php foreach ($categorias as $categoria): ?>
+                    
+                            <p><?= htmlspecialchars($categoria->nome, ENT_QUOTES, 'UTF-8') ?></p>
+                                                          
+                    <?php endforeach ?>
+                            
+                    <?php else: ?>
+                            <p>Nenhum categoria para ser exibida</p>
+                    <?php endif ?>    
+                </th>
 
-___________________________________________________________________________________________________________________
+app\Views\site\rodape.php
 
-site\rodape.php
+pesquisar em https://www.creative-tim.com/twcomponents
 
+app\Views\site\sobre.php
 
+https://www.creative-tim.com/twcomponents
+
+app\Views\site\topo.php
+
+https://www.creative-tim.com/twcomponents
 ____________________________________________________________________________________________________________________
 
-site\topo.php
+public
 
-_____________________________________________________________________________________________________________________
+public\.htaccess`
 
-site\sobre.php
+RewriteEngine on
+
+RewriteCond %{SCRIPT_FILENAME} !-f
+RewriteCond %{SCRIPT_FILENAME} !-d
+RewriteRule ^(.*)$ index.php [L]
+
+Aqui está a explicação detalhada do seu código `.htaccess` :
+
+### Explicação:
+1. **`RewriteEngine on`**  
+   - Ativa o módulo de reescrita de URLs do Apache.
+
+2. **`RewriteCond %{SCRIPT_FILENAME} !-f`**  
+   - **Condição 1:** Verifica se o arquivo solicitado **não existe** (!-f = "not a file") no servidor.
+
+3. **`RewriteCond %{SCRIPT_FILENAME} !-d`**  
+   - **Condição 2:** Verifica se o diretório solicitado **não existe** (!-d = "not a directory") no servidor.
+
+4. **`RewriteRule ^(.*)$ index.php [L]`**  
+   - **Regra:** Se as duas condições acima forem atendidas (ou seja, a requisição não é para um arquivo ou diretório real), redireciona TODAS as URLs para `index.php`.  
+   - O `[L]` indica que esta é a última regra a ser processada.
+
+---
+
+### Como Funciona na Prática:
+- Se você acessar:  
+  ✅ `http://site.com/rota/inexistente` → Vai para `index.php` (pois não é arquivo nem diretório real)  
+  ✅ `http://site.com/login` → Vai para `index.php`  
+  ❌ `http://site.com/imagem.jpg` → **Mostra a imagem** (se existir no servidor)  
+  ❌ `http://site.com/css/` → **Mostra o diretório** (se existir)
+
+---
+
+### Uso Típico:
+- **Front Controller Pattern**: Muito usado em frameworks PHP (Laravel, Symfony) para rotear todas as requisições através de um único arquivo (`index.php`), que então decide como processar a URL.
+
+- **SPA (Single Page Applications)**: Útil para aplicações JavaScript (React, Vue) onde o servidor só precisa servir `index.html` para todas rotas.
+
+---
+
+### Adaptações Comuns:
+1. **Adicionar parâmetro de rota (para PHP):**
+   ```apache
+   RewriteRule ^(.*)$ index.php?url=$1 [L,QSA]
+   ```
+   - O `QSA` (Query String Append) mantém parâmetros GET existentes.
+
+2. **Ignorar arquivos específicos (ex: `.well-known`):**
+   ```apache
+   RewriteCond %{REQUEST_URI} !^/\.well-known/
+   
+
+public\index.php
+
+<?php
+require __DIR__ . '../../vendor/autoload.php';
+include '../app/Core/Route.php';
+
+use app\Core\Env;
+$env = Env::load();
+
+use app\Core\Route;
+
+$route = new Route();
+
+use app\Core\Database;
+
+$conn = Database::getConexao();
 
 
+public\assets
+
+public\assets\css
+
+public\assets\css\site.css
+A DESENVOLVER
+
+public\assets\img
+A DESENVOLVER
+
+public\assets\js
+
+public\assets\css\site.js
+A DESENVOLVER
 ____________________________________________________________________________________________________________________
+
