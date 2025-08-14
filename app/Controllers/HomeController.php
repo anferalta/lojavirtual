@@ -3,6 +3,8 @@
 namespace app\Controllers;
 
 use app\Core\View;
+use app\Model\ProdutoModel as Produtos;
+use app\Model\CategoriaModel as Categorias;
 
 /**
  * Description of HomeController
@@ -12,10 +14,15 @@ use app\Core\View;
 
 class HomeController 
 {
-    public function index() :void
+    public function index():void
     {
-        View::render('site/home', [
-            'title' => 'Página Index'
+        $categorias = Categorias::buscar();
+        $produtos = Produtos::buscar();
+                        
+       View::render('site/home', [
+           'title' => 'Página Index',
+           'produtos' => $produtos,
+           'categorias' => $categorias
         ]);
     }
 }
