@@ -7,8 +7,8 @@
                     <span class="sr-only">Image</span>
                 </th>
                 <th scope="col" class="px-6 py-3">
-                    Produto
-                    
+                    <h1>Produto</h1>
+                                        
                     <?php if (!empty($produtos)): ?>
                             <?php foreach ($produtos as $produto): ?>
                     
