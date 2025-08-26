@@ -12,37 +12,36 @@ use PDOException;
  */
 class Database
 {
+
     private static ?PDO $conexao = null;
-    
+
     private function __clone(): void
     {
         
     }
-    
+
     public static function getConexao(): PDO
     {
-        if(self::$conexao === null){
+        if (self::$conexao === null) {
             try {
-               $host = getenv('DB_HOST');
-               $banco = getenv('DB_NAME');
-               $usuario = getenv('DB_USER');
-               $senha = getenv('DB_PASS');
-               $charset = 'utf8mb4';
-               
-               $dsn = "mysql:host=$host;dbname=$banco;charset=$charset";
-               
-               $options = [
-               PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION, PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_OBJ,
-                   
-               ];
-               
-               self::$conexao = new PDO($dsn, $usuario, $senha, $options);
-               echo 'conexao realizada com sucesso';
-                
+                $host = getenv('DB_HOST');
+                $banco = getenv('DB_NAME');
+                $usuario = getenv('DB_USER');
+                $senha = getenv('DB_PASS');
+                $charset = 'utf8mb4';
+
+                $dsn = "mysql:host=$host;dbname=$banco;charset=$charset";
+
+                $options = [
+                    PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION, PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_OBJ,
+                ];
+
+                self::$conexao = new PDO($dsn, $usuario, $senha, $options);
+                echo 'conexao realizada com sucesso';
             } catch (PDOException $ex) {
-                throw new PDOException("Erro ao realizar a conexão com o banco de dados ".$sex);
+                throw new PDOException("Erro ao realizar a conexão com o banco de dados " . $sex);
             }
         }
-        return self::$conexao;   
+        return self::$conexao;
     }
 }

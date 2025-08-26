@@ -11,18 +11,18 @@ use app\Model\CategoriaModel as Categorias;
  *
  * @author Administrador
  */
-
-class HomeController 
+class HomeController
 {
-    public function index():void
+
+    public function index(): void
     {
         $categorias = Categorias::buscar();
         $produtos = Produtos::buscar();
-                        
-       View::render('site/home', [
-           'title' => 'Página Index',
-           'produtos' => $produtos,
-           'categorias' => $categorias
+
+        View::render('site/home', [
+            'title' => 'Página Index',
+            'produtos' => $produtos,
+            'categorias' => $categorias
         ]);
     }
 }

@@ -6,11 +6,11 @@
     </head>
     <body>
         <?php include 'topo.php'; ?>
-        
+
         <?= $conteudo ?? ''; ?>
-        
+
         <?php include 'rodape.php'; ?>
-        
+
         <script src="public/assets/js/site.js"></script>
     </body>
 </html>

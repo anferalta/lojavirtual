@@ -9,13 +9,13 @@ use app\Core\View;
  *
  * @author Administrador
  */
-
 class SobreController
 {
-    public function index() : void
+
+    public function index(): void
     {
         View::render('site/sobre', [
             'title' => 'Página sobre'
-        ]);  
+        ]);
     }
 }

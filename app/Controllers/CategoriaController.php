@@ -1,6 +1,5 @@
 <?php
 
-
 namespace app\Controllers;
 
 /**
@@ -10,6 +9,7 @@ namespace app\Controllers;
  */
 class CategoriaController
 {
+
     private function index(): void
     {
         echo 'categoria';
